@@ -59,8 +59,8 @@ jobs:
           import json, re
           with open('apps/linode-marketplace-flowtriq/roles/ftagent/templates/config.json.j2') as f:
               content = f.read()
-          # Replace Jinja2 vars with placeholder strings for JSON validation
-          stripped = re.sub(r'\{\{.*?\}\}', '\"placeholder\"', content)
+          # Replace quoted Jinja2 vars (\"{{ var }}\") with placeholder strings for JSON validation
+          stripped = re.sub(r'\"?\{\{.*?\}\}\"?', '\"placeholder\"', content)
           json.loads(stripped)
           print('config.json.j2 template is valid JSON')
           "
