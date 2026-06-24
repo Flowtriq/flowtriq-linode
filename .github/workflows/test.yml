@@ -1,0 +1,80 @@
+name: Lint and Validate
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/linode-marketplace-flowtriq
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          ansible-galaxy install -r collections.yml
+
+      - name: YAML lint
+        run: yamllint .
+
+      - name: Ansible lint
+        run: ansible-lint
+
+  shellcheck:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: ShellCheck deploy script
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: deployment_scripts
+
+  validate-config:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate JSON template syntax
+        run: |
+          python3 -c "
+          import json, re
+          with open('apps/linode-marketplace-flowtriq/roles/ftagent/templates/config.json.j2') as f:
+              content = f.read()
+          # Replace Jinja2 vars with placeholder strings for JSON validation
+          stripped = re.sub(r'\{\{.*?\}\}', '\"placeholder\"', content)
+          json.loads(stripped)
+          print('config.json.j2 template is valid JSON')
+          "
+
+      - name: Verify required files exist
+        run: |
+          test -f deployment_scripts/flowtriq-deploy.sh
+          test -f deployment_scripts/linode-config.sh
+          test -f deployment_scripts/test-vars.sh
+          test -f apps/linode-marketplace-flowtriq/site.yml
+          test -f apps/linode-marketplace-flowtriq/provision.yml
+          test -f apps/linode-marketplace-flowtriq/ansible.cfg
+          test -f apps/linode-marketplace-flowtriq/requirements.txt
+          test -f apps/linode-marketplace-flowtriq/collections.yml
+          test -f apps/linode-marketplace-flowtriq/roles/ftagent/tasks/main.yml
+          test -f apps/linode-marketplace-flowtriq/roles/ftagent/templates/config.json.j2
+          echo "All required files present"

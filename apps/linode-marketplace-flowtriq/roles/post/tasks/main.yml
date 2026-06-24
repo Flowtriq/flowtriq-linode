@@ -1,0 +1,22 @@
+---
+- name: Copy MOTD template to /etc/motd
+  template:
+    src: templates/motd.j2
+    dest: /etc/motd
+    mode: '0644'
+    owner: root
+    group: root
+
+- name: Writing credentials file
+  copy:
+    dest: '/home/{{ username }}/.credentials'
+    mode: '0600'
+    owner: '{{ username }}'
+    group: '{{ username }}'
+    content: |
+      # Flowtriq ftagent
+      Sudo Username: {{ username }}
+      Sudo Password: {{ password }}
+      ftagent Config: /etc/ftagent/config.json
+      ftagent Logs: journalctl -u ftagent
+      Dashboard: https://flowtriq.com/dashboard

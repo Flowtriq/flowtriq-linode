@@ -1,0 +1,55 @@
+---
+- name: Install ftagent dependencies
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: true
+  vars:
+    packages:
+      - python3-pip
+      - python3-dev
+      - libpcap-dev
+      - tcpdump
+
+- name: Install ftagent from PyPI
+  pip:
+    name: ftagent[full]
+    extra_args: --break-system-packages
+    state: latest
+
+- name: Create ftagent config directory
+  file:
+    path: /etc/ftagent
+    state: directory
+    mode: '0700'
+    owner: root
+    group: root
+
+- name: Write ftagent config
+  template:
+    src: config.json.j2
+    dest: /etc/ftagent/config.json
+    mode: '0600'
+    owner: root
+    group: root
+  when: ftagent_api_key is defined and ftagent_node_uuid is defined
+
+- name: Install ftagent systemd service
+  command: ftagent --install-service
+  args:
+    creates: /etc/systemd/system/ftagent.service
+
+- name: Enable and start ftagent
+  systemd:
+    name: ftagent
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: ftagent_api_key is defined and ftagent_node_uuid is defined
+
+- name: Leave ftagent disabled when no credentials provided
+  systemd:
+    name: ftagent
+    enabled: false
+    daemon_reload: true
+  when: ftagent_api_key is not defined or ftagent_node_uuid is not defined

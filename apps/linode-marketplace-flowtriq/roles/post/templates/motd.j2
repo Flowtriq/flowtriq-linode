@@ -1,0 +1,18 @@
+*********************************************************
+Flowtriq DDoS Detection Agent (ftagent)
+*********************************************************
+
+  Dashboard:     https://flowtriq.com/dashboard
+  Docs:          https://flowtriq.com/docs
+  Config:        /etc/ftagent/config.json
+  Service:       systemctl status ftagent
+  Logs:          journalctl -u ftagent -f
+
+{% if ftagent_api_key is not defined or ftagent_node_uuid is not defined %}
+  To configure:  sudo ftagent --setup
+{% endif %}
+
+  Support:       https://discord.gg/SsTWMYuyGG
+                 hello@flowtriq.com
+
+*********************************************************
