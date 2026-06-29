@@ -50,4 +50,4 @@ Provide your Flowtriq API key and Node UUID during deployment and the agent star
 
 - **Brand Color 1:** #2563EB
 - **Brand Color 2:** #1E40AF
-- **Logo:** See assets/ directory
+- **Logo:** Available at [flowtriq.com/brand](https://flowtriq.com/brand)
